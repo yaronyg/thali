@@ -11,15 +11,16 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 See the Apache 2 License for the specific language governing permissions and limitations under the License.
 */
 
-package com.msopentech.thali.utilities.universal.test;
+package com.msopentech.thali.test.utilities.universal;
 
-import com.couchbase.lite.Context;
+import com.couchbase.lite.*;
+import com.msopentech.thali.test.utilities.*;
+import com.msopentech.thali.test.utilities.universal.*;
 import com.msopentech.thali.utilities.universal.*;
-import org.apache.commons.io.FileUtils;
-import org.ektorp.CouchDbConnector;
+import org.apache.commons.io.*;
+import org.ektorp.*;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.security.*;
 
 /**

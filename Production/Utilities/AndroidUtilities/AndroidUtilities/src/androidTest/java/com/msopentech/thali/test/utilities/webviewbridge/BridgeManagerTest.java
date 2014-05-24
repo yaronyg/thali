@@ -11,14 +11,17 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 See the Apache 2 License for the specific language governing permissions and limitations under the License.
 */
 
-package com.msopentech.thali.utilities.webviewbridge;
+package com.msopentech.thali.test.utilities.webviewbridge;
 
-/**
- * This is common code to be used by Android and JavaFX for testing purposes.
- */
-public class BridgeManagerTest {
+import com.msopentech.thali.testinfrastructure.*;
+import com.msopentech.thali.utilities.webviewbridge.*;
+
+import java.net.*;
+
+public class BridgeManagerTest extends ThaliBridgeTestCase {
     public static Object waitObject = new Object();
-    public static String bridgeHandlerTestJs = "/BridgeHandlerTest.js";
+    public static String pathToBridgeHandlerTestHtml = "test/BridgeManagerTest/test.html";
+
     public enum pingStatus { unset, failed, success }
     public static pingStatus seenPing2 = pingStatus.unset;
 
@@ -58,36 +61,16 @@ public class BridgeManagerTest {
         }
     }
 
-    /**
-     * Launches the test by running the test javascript that calls a bridge handler configured by this code. This
-     * method is usually called inside of a context (like the Application start) that isn't directly visible to
-     * JUnit. Hence we have the partner method, testResult, that can be called from JUnit that will block until the
-     * test completes.
-     * @param bridgeManager
-     */
-    public void launchTest(BridgeManager bridgeManager) {
-        BridgeHandler bridgeTest = new BridgeTest();
-        bridgeManager.register(bridgeTest);
-        String bridgeManagerJs =
-                BridgeManager.turnUTF8InputStreamToString(getClass().getResourceAsStream(BridgeManager.pathToBridgeManagerJs));
-        bridgeManager.executeJavascript(bridgeManagerJs);
-        String testJavaScript =
-                BridgeManager.turnUTF8InputStreamToString(getClass().getResourceAsStream(bridgeHandlerTestJs));
-        bridgeManager.executeJavascript(testJavaScript);
-    }
+    public void testBridge() throws MalformedURLException, InterruptedException {
+        getBridgeManager().register(new BridgeTest());
+        loadHtmlInWebView(new URL(new URL(getBaseURLForTestFiles()), pathToBridgeHandlerTestHtml).toExternalForm());
 
-    /**
-     * See launchTest.
-     * @return
-     * @throws InterruptedException
-     */
-    public boolean testResult() throws InterruptedException {
         synchronized (waitObject) {
             while(seenPing2 == pingStatus.unset) {
                 waitObject.wait();
             }
         }
 
-        return seenPing2 == pingStatus.success;
+        assertEquals(seenPing2, pingStatus.success);
     }
 }

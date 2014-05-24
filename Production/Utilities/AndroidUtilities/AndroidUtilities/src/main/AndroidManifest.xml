@@ -9,13 +9,7 @@
         android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
         android:theme="@style/AppTheme">
-        <activity android:name="com.msopentech.thali.utilities.android.AndroidBridgeManagerTestActivity"
-                  android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-        </activity>
-        <activity android:name="com.msopentech.thali.utilities.android.AndroidXmlHttpRequestTestActivity"
+        <activity android:name=".AndroidBridgeManagerTestActivity"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

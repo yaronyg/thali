@@ -85,27 +85,46 @@ artifacts {
 }
 
 /**
+ * Ideally we would just stick all of our files into the resources folder under src/main/. This is certainly
+ * the way to handle things in Java. Unfortunately we haven't found a way in Android to point a webview at
+ * the resources directory of a Jar file. Which means we have to copy the contents out of the resources in the jar
+ * file and put them someplace that Android can get to. But even that is a problem because we also haven't
+ * found a way to enumerate the contents of the resources directory of a Jar file in Android. So if you don't already
+ * know the names of the files you want to copy then there is no way to get to them. At least that we have found.
+ * So the solution we use is to zip up all the files we need and put that zip file at a well known location in
+ * the resources directory. Then at run time we pull out that zip file (in either Java or Android) and unzip the
+ * contents in some happy place and let the webview at it.
+ */
+//task createResourceZip(type: Zip) {
+//    archiveName = 'resourcesfiles.zip'
+//    from file(new File('src/resourcesToZip'))
+//    destinationDir = file(new File('src/main/resources'))
+//}
+//
+//compileJava.dependsOn createResourceZip
+
+/**
  * Sigh... o.k. so I can't figure out how to enumerate the contents of a resource directory in a jar in
  * Android. And since I'm editing the contents of this directory all the time this is a problem. So my hacky
  * solution is to generate a manifest of the directory's contents and then read that in Android at run
  * time so I know what files to load.
  */
-task generateXhrTestManifest() {
-    def xhrtestPath = "src/main/resources/xhrtest/"
-    def manifestFile = file(new File(xhrtestPath + "manifest.csv"))
-    if (manifestFile.exists()) {
-        assert manifestFile.delete()
-    }
+//task generateXhrTestManifest() {
+//    def xhrtestPath = "src/main/resources/xhrtest/"
+//    def manifestFile = file(new File(xhrtestPath + "manifest.csv"))
+//    if (manifestFile.exists()) {
+//        assert manifestFile.delete()
+//    }
+//
+//    def xhrDirectoryFile = file(new File(xhrtestPath))
+//
+//    def fileList = ""
+//    xhrDirectoryFile.listFiles().each {File file ->
+//        fileList += file.getName() + ","
+//    }
+//    println("FileList = " + fileList)
+//    assert manifestFile.createNewFile()
+//    manifestFile.write(fileList)
+//}
 
-    def xhrDirectoryFile = file(new File(xhrtestPath))
-
-    def fileList = ""
-    xhrDirectoryFile.listFiles().each {File file ->
-        fileList += file.getName() + ","
-    }
-    println("FileList = " + fileList)
-    assert manifestFile.createNewFile()
-    manifestFile.write(fileList)
-}
-
-compileJava.dependsOn generateXhrTestManifest
+//compileJava.dependsOn generateXhrTestManifest

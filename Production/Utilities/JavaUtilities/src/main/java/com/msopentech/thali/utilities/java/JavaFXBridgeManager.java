@@ -20,6 +20,9 @@ import javafx.scene.web.WebEngine;
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 
+import java.io.*;
+import java.nio.file.*;
+
 public class JavaFXBridgeManager extends BridgeManager {
     protected WebEngine webEngine;
 
@@ -31,6 +34,17 @@ public class JavaFXBridgeManager extends BridgeManager {
         JSObject jsObject = (JSObject) webEngine.executeScript("window");
         Bridge bridge = this;
         jsObject.setMember(this.getManagerNameInJavascript(), bridge);
+
+        try {
+            createResourcesFileDirectoryAndFillItUp(Files.createTempDirectory("JavaUtilitiesFiles").toFile());
+        } catch (IOException e) {
+            throw new RuntimeException("oops", e);
+        }
+    }
+
+    @Override
+    public File getResourceFileRoot() {
+        return resourcesFileDirectory;
     }
 
     @Override

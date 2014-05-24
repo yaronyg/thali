@@ -13,14 +13,14 @@ See the Apache 2 License for the specific language governing permissions and lim
 
 package com.msopentech.thali.utilities.android;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.os.Build;
-import android.util.Log;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
-import com.msopentech.thali.utilities.webviewbridge.Bridge;
-import com.msopentech.thali.utilities.webviewbridge.BridgeManager;
+import android.annotation.*;
+import android.app.*;
+import android.os.*;
+import android.webkit.*;
+import com.msopentech.thali.utilities.webviewbridge.*;
+import org.apache.commons.io.*;
+
+import java.io.*;
 
 public class AndroidBridgeManager extends BridgeManager implements Bridge {
     protected WebView webview;
@@ -50,6 +50,11 @@ public class AndroidBridgeManager extends BridgeManager implements Bridge {
 
     protected String CreateJavascriptUrl(String javaScriptString) {
         return "javascript:(function() {" + javaScriptString + "})()\n";
+    }
+
+    @Override
+    public File getResourceFileRoot() {
+        return new File("file:///android_asset/thali/");
     }
 
     @Override

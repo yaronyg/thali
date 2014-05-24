@@ -12,23 +12,17 @@ See the Apache 2 License for the specific language governing permissions and lim
 */
 
 
-package com.msopentech.thali.utilities.universal.test;
+package com.msopentech.thali.test.utilities;
 
-import com.msopentech.thali.CouchDBListener.ThaliListener;
-import com.msopentech.thali.utilities.universal.ThaliClientToDeviceHubUtilities;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.CouchDbInstance;
-import org.ektorp.support.CouchDbDocument;
+import com.msopentech.thali.CouchDBListener.*;
+import com.msopentech.thali.utilities.universal.*;
+import org.ektorp.*;
+import org.ektorp.support.*;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.security.*;
+import java.security.spec.*;
+import java.util.*;
+import java.util.logging.*;
 
 /**
  * These are utilities used to run tests in different projects.

@@ -11,27 +11,29 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 See the Apache 2 License for the specific language governing permissions and limitations under the License.
 */
 
-package com.msopentech.thali.utilities.universal.test;
+package com.msopentech.thali.test.utilities.universal;
 
-import com.couchbase.lite.Context;
-import com.msopentech.thali.CouchDBListener.ThaliListener;
-import com.msopentech.thali.utilities.universal.CreateClientBuilder;
-import com.msopentech.thali.utilities.universal.ThaliClientToDeviceHubUtilities;
-import com.msopentech.thali.utilities.universal.ThaliCryptoUtilities;
-import com.msopentech.thali.utilities.universal.ThaliUrlConnection;
-import org.ektorp.CouchDbInstance;
+import com.couchbase.lite.*;
+import com.msopentech.thali.CouchDBListener.*;
+import com.msopentech.thali.test.utilities.*;
+import com.msopentech.thali.testinfrastructure.*;
+import com.msopentech.thali.utilities.universal.*;
+import org.ektorp.*;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.File;
-import java.io.IOException;
+import javax.net.ssl.*;
+import java.io.*;
 import java.security.*;
 
-public class ThaliTestUrlConnection {
+public class ThaliTestUrlConnection extends ThaliTestCase {
 
-    public static void TestThaliUrlConnection(String host, char[] passPhrase, CreateClientBuilder createClientBuilder,
-                                              Context context)
+    public void testThaliUrlConnection()
             throws InterruptedException, UnrecoverableEntryException, KeyManagementException, NoSuchAlgorithmException,
             KeyStoreException, IOException {
+        String host = ThaliListener.DefaultThaliDeviceHubAddress;
+        char[] passPhrase = ThaliCryptoUtilities.DefaultPassPhrase;
+        CreateClientBuilder createClientBuilder = this.getCreateClientBuilder();
+        Context context = this.getCouchbaseContext();
+
         ThaliTestUtilities.configuringLoggingApacheClient();
 
         ThaliListener thaliTestServer = new ThaliListener();

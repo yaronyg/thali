@@ -22,6 +22,8 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import org.junit.Test;
 
+import java.io.*;
+
 import static org.junit.Assert.assertTrue;
 
 public class JavaFXBridgeManagerTest {
@@ -29,7 +31,7 @@ public class JavaFXBridgeManagerTest {
 
     public static class AppHosting extends Application {
         @Override
-        public void start(Stage stage) {
+        public void start(Stage stage) throws FileNotFoundException {
             WebView browser = new WebView();
             WebEngine webEngine = browser.getEngine();
             BridgeManager bridgeManager = new JavaFXBridgeManager(webEngine);

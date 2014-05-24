@@ -12,9 +12,9 @@ See the Apache 2 License for the specific language governing permissions and lim
 */
 
 
-package com.msopentech.thali.utilities.universal.test;
+package com.msopentech.thali.test.utilities;
 
-import org.ektorp.support.CouchDbDocument;
+import org.ektorp.support.*;
 
 public class CouchDBDocumentBlogClassForTests extends CouchDbDocument {
     private String blogArticleName;
@@ -41,7 +41,9 @@ public class CouchDBDocumentBlogClassForTests extends CouchDbDocument {
         if ((object instanceof CouchDBDocumentBlogClassForTests) == false) {
             return false;
         }
+
         CouchDBDocumentBlogClassForTests compareTo = (CouchDBDocumentBlogClassForTests) object;
+
         return (this.getId().equals(compareTo.getId()) &&
                 this.getRevision().equals(compareTo.getRevision()) &&
                 this.getBlogArticleName().equals(compareTo.getBlogArticleName()) &&

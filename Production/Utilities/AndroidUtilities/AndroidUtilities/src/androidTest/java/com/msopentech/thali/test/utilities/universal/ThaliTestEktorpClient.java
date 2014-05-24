@@ -11,39 +11,28 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 See the Apache 2 License for the specific language governing permissions and limitations under the License.
 */
 
-package com.msopentech.thali.utilities.universal.test;
+package com.msopentech.thali.test.utilities.universal;
 
-import com.couchbase.lite.Context;
-import com.couchbase.lite.CouchbaseLiteException;
-import com.couchbase.lite.Database;
-import com.couchbase.lite.Manager;
-import com.couchbase.lite.replicator.Replication;
-import com.couchbase.lite.util.Log;
-import com.msopentech.thali.CouchDBListener.ThaliListener;
-import com.msopentech.thali.utilities.universal.CreateClientBuilder;
-import com.msopentech.thali.utilities.universal.HttpKeyURL;
-import com.msopentech.thali.utilities.universal.ThaliCryptoUtilities;
-import com.msopentech.thali.utilities.universal.ThaliReplicationCommand;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.CouchDbInstance;
-import org.ektorp.DbAccessException;
-import org.ektorp.ReplicationStatus;
-import org.ektorp.http.HttpClient;
-import org.ektorp.impl.StdCouchDbInstance;
-import org.ektorp.support.CouchDbDocument;
+import com.couchbase.lite.*;
+import com.couchbase.lite.replicator.*;
+import com.couchbase.lite.util.*;
+import com.msopentech.thali.CouchDBListener.*;
+import com.msopentech.thali.test.utilities.*;
+import com.msopentech.thali.testinfrastructure.*;
+import com.msopentech.thali.utilities.universal.*;
+import org.ektorp.*;
+import org.ektorp.http.*;
+import org.ektorp.impl.*;
+import org.ektorp.support.*;
 
-import javax.net.ssl.SSLException;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import javax.net.ssl.*;
+import java.io.*;
+import java.lang.reflect.*;
+import java.net.*;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.security.spec.*;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * This class contains all the generic test code to exercise both the Ektorp client as well as CouchBase Lite.
@@ -55,41 +44,32 @@ import java.util.concurrent.TimeUnit;
  * tests. This is necessary to work around a bug in TJWS (https://github.com/couchbase/couchbase-lite-java-listener/issues/43)
  * that keeps threads (and file locks) when you think you have killed TJWS.
  */
-public class ThaliTestEktorpClient {
+public class ThaliTestEktorpClient extends ThaliTestCase {
     public static final String KeyId = "key";
     public static final String ReplicationTestDatabaseName = "replicationtest";
 
     public static final int MaximumTestRecords = 10;
 
-    private final String host;
-    private final char[] passPhrase;
-    private final Context context;
-    private final CreateClientBuilder createClientBuilder;
+    private String host;
+    private char[] passPhrase;
+    private Context context;
+    private CreateClientBuilder createClientBuilder;
     private int port;
 
     private ThaliListener thaliTestServer = null;
     private ConfigureRequestObjects configureRequestObjects;
 
-
-    /**
-     * Creates a local instance of the Thali Listener to use for testing
-     * @param host
-     * @param passPhrase
-     * @param context
-     * @param createClientBuilder
-     * @param childClass This is the class object of the test environment that created this object
-     */
-    public ThaliTestEktorpClient(String host, char[] passPhrase, Context context,
-                                      CreateClientBuilder createClientBuilder, Class childClass)
-            throws InterruptedException {
+    public void setUp() throws InterruptedException, UnrecoverableEntryException, NoSuchAlgorithmException,
+            KeyStoreException, KeyManagementException, IOException {
         ThaliTestUtilities.configuringLoggingApacheClient();
 
-        this.host = host;
-        this.passPhrase = passPhrase;
-        this.context = context;
-        this.createClientBuilder = createClientBuilder;
+        this.host = ThaliListener.DefaultThaliDeviceHubAddress;
+        this.passPhrase = ThaliCryptoUtilities.DefaultPassPhrase;
+        this.context = this.getCouchbaseContext();
+        this.createClientBuilder = this.getCreateClientBuilder();
 
         thaliTestServer = new ThaliListener();
+
 
         // We use a random port (e.g. port 0) both because it's good hygiene and because it keeps us from conflicting
         // with the 'real' Thali Device Hub if it's running.
@@ -97,38 +77,23 @@ public class ThaliTestEktorpClient {
 
         port = thaliTestServer.getSocketStatus().getPort();
 
-        checkIfChildClassExecutesAllTests(childClass);
-    }
-
-    /**
-     * Does not create a local instance of the Thali Listener, one needs to already exist as the given
-     * host and port.
-     * @param host
-     * @param port
-     * @param passPhrase
-     * @param context
-     * @param createClientBuilder
-     * @param childClass
-     */
-    public ThaliTestEktorpClient(String host, int port, char[] passPhrase, Context context,
-                                 CreateClientBuilder createClientBuilder, Class childClass)
-            throws InterruptedException {
-        this(host, passPhrase, context, createClientBuilder, childClass);
-        this.thaliTestServer = null;
-        this.port = port;
-    }
-
-    public void setUp() throws InterruptedException, UnrecoverableEntryException, NoSuchAlgorithmException,
-            KeyStoreException, KeyManagementException, IOException {
         configureRequestObjects = new ConfigureRequestObjects(host, port, passPhrase, createClientBuilder, context);
     }
 
+    @Override
     public void tearDown() {
+        thaliTestServer.stopServer();
     }
 
     public void testPullReplication() throws InvalidKeySpecException, NoSuchAlgorithmException,
             InterruptedException, MalformedURLException, CouchbaseLiteException, URISyntaxException {
         replicationTestEngine(false);
+    }
+
+    public void testPushReplication() throws UnrecoverableEntryException, KeyManagementException, NoSuchAlgorithmException,
+            KeyStoreException, IOException, InterruptedException, InvalidKeySpecException, URISyntaxException,
+            CouchbaseLiteException {
+        replicationTestEngine(true);
     }
 
     /**
@@ -137,12 +102,12 @@ public class ThaliTestEktorpClient {
      * with data and the remote database will be empty) or pull base (in which case the local database will be left
      * empty initially and the remote database filled with data).
      * @param push
-     * @throws InvalidKeySpecException
-     * @throws NoSuchAlgorithmException
+     * @throws java.security.spec.InvalidKeySpecException
+     * @throws java.security.NoSuchAlgorithmException
      * @throws InterruptedException
-     * @throws MalformedURLException
-     * @throws CouchbaseLiteException
-     * @throws URISyntaxException
+     * @throws java.net.MalformedURLException
+     * @throws com.couchbase.lite.CouchbaseLiteException
+     * @throws java.net.URISyntaxException
      */
     protected void replicationTestEngine(boolean push) throws InvalidKeySpecException, NoSuchAlgorithmException,
             InterruptedException, MalformedURLException, CouchbaseLiteException, URISyntaxException {
@@ -218,19 +183,13 @@ public class ThaliTestEktorpClient {
                 execute);
     }
 
-    public void testPushReplication() throws UnrecoverableEntryException, KeyManagementException, NoSuchAlgorithmException,
-            KeyStoreException, IOException, InterruptedException, InvalidKeySpecException, URISyntaxException,
-            CouchbaseLiteException {
-            replicationTestEngine(true);
-    }
-
     /**
      * Runs a test where we set a user key in one database and then post to another.
-     * @throws IOException
-     * @throws KeyManagementException
-     * @throws NoSuchAlgorithmException
-     * @throws UnrecoverableKeyException
-     * @throws KeyStoreException
+     * @throws java.io.IOException
+     * @throws java.security.KeyManagementException
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.security.UnrecoverableKeyException
+     * @throws java.security.KeyStoreException
      */
     public void testRetrieve()
             throws IOException, KeyManagementException, NoSuchAlgorithmException, UnrecoverableEntryException,
@@ -239,7 +198,7 @@ public class ThaliTestEktorpClient {
                 new ConfigureRequestObjects(host, port, passPhrase, createClientBuilder, context);
 
         Collection<CouchDbDocument> testDocuments = ThaliTestUtilities.setUpData(
-                configureRequestObjects.thaliCouchDbInstance, ThaliTestUtilities.TestDatabaseName , 1,
+                configureRequestObjects.thaliCouchDbInstance, ThaliTestUtilities.TestDatabaseName, 1,
                 MaximumTestRecords, configureRequestObjects.clientPublicKey);
         ThaliTestUtilities.validateDatabaseState(configureRequestObjects.testDatabaseConnector, testDocuments);
         runBadKeyTest(host, port, createClientBuilder, configureRequestObjects.serverPublicKey,
@@ -331,16 +290,6 @@ public class ThaliTestEktorpClient {
         ValidateReplicationCompletion(true, replicationChangeListener, sourceConnector, targetConnector);
     }
 
-    protected ReplicationChangeListener PullReplicateAndTest(String local, String remote, boolean continuous)
-            throws InterruptedException, MalformedURLException, CouchbaseLiteException, URISyntaxException {
-        return ReplicateAndTest(local, remote, false, continuous);
-    }
-
-    protected ReplicationChangeListener PushReplicateAndTest(String source, String target, boolean continuous)
-            throws InterruptedException, MalformedURLException, CouchbaseLiteException, URISyntaxException {
-        return ReplicateAndTest(source, target, true, continuous);
-    }
-
     /**
      * Either pushes from source to target or pulls from target to source depending on the value of push.
      * @param source
@@ -348,8 +297,8 @@ public class ThaliTestEktorpClient {
      * @param push
      * @param continuous
      * @throws InterruptedException
-     * @throws MalformedURLException
-     * @throws URISyntaxException
+     * @throws java.net.MalformedURLException
+     * @throws java.net.URISyntaxException
      * @return
      */
     protected ReplicationChangeListener ReplicateAndTest(String source, String target, boolean push, boolean continuous)
@@ -430,10 +379,10 @@ public class ThaliTestEktorpClient {
      * @param actualServerPublicKey
      * @param actualClientKeyStore
      * @param clientPassPhrase
-     * @throws UnrecoverableKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws KeyStoreException
-     * @throws KeyManagementException
+     * @throws java.security.UnrecoverableKeyException
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.security.KeyStoreException
+     * @throws java.security.KeyManagementException
      */
     protected static void runBadKeyTest(String host, int port, CreateClientBuilder createClientBuilder,
                                      PublicKey actualServerPublicKey, KeyStore actualClientKeyStore,

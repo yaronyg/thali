@@ -126,7 +126,7 @@ task unzipAndCopyJavaTDH(type: Copy, dependsOn: copyAndroidTDH) {
 
 task copyPPNETFilesIntoChromeExtension(type: Copy, dependsOn: unzipAndCopyJavaTDH) {
     from '../../ppnet/'
-    into 'build/PPNET/ChromeExtension/apps'
+    into 'build/PPNET/ChromeExtension/apps/ppnet'
 }
 
 task copyPouchAPKToOwnDirectory(type: Copy, dependsOn: copyPPNETFilesIntoChromeExtension) {
