@@ -53,11 +53,6 @@ public class AndroidBridgeManager extends BridgeManager implements Bridge {
     }
 
     @Override
-    public File getResourceFileRoot() {
-        return new File("file:///android_asset/thali/");
-    }
-
-    @Override
     public void executeJavascript(final String javascriptFileString) {
         activity.runOnUiThread(new Runnable() {
             @Override

@@ -11,19 +11,21 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 See the Apache 2 License for the specific language governing permissions and limitations under the License.
 */
 
-package com.msopentech.thali.utilities.xmlhttprequestbridge;
+package com.msopentech.thali.test.utilities.xmlhttprequestbridge;
 
-import com.couchbase.lite.Context;
-import com.couchbase.lite.util.Log;
-import com.msopentech.thali.CouchDBListener.ThaliListener;
-import com.msopentech.thali.utilities.universal.CreateClientBuilder;
-import com.msopentech.thali.utilities.webviewbridge.BridgeCallBack;
-import com.msopentech.thali.utilities.webviewbridge.BridgeHandler;
-import com.msopentech.thali.utilities.webviewbridge.BridgeManager;
+import com.couchbase.lite.*;
+import com.couchbase.lite.util.*;
+import com.msopentech.thali.CouchDBListener.*;
+import com.msopentech.thali.testinfrastructure.*;
+import com.msopentech.thali.utilities.webviewbridge.*;
+import com.msopentech.thali.utilities.xmlhttprequestbridge.*;
+import com.msopentech.thali.utilities.xmlhttprequestbridge.Bridge;
 
-public class BridgeTestManager {
+import java.net.*;
+
+public class XhrTest extends ThaliBridgeTestCase {
     public static Object waitObject = new Object();
-    public static String testHtml = "xhrtest/test.html";
+    public static String testHtml = "test/xhrtest/test.html";
     public enum pingStatus { unset, failed, success }
     public static pingStatus seenPing = pingStatus.unset;
     public ThaliListener thaliListenerFirstHub, thaliListenerSecondHub;
@@ -61,28 +63,20 @@ public class BridgeTestManager {
         }
     }
 
-    public BridgeTestManager() {
+
+    public XhrTest() {
         // Wacky useful for debugging what's on the wire!
         //ThaliTestUtilities.configuringLoggingApacheClient();
     }
 
-    /**
-     *
-     * @param bridgeManager
-     * @param createClientBuilder
-     * @param bridgeTestLoadHtml
-     * @param pathToTestHtml
-     * @param contextForFirstHub
-     * @param contextForSecondHub
-     * @throws InterruptedException
-     */
-    public void launchTest(BridgeManager bridgeManager, CreateClientBuilder createClientBuilder,
-                           BridgeTestLoadHtml bridgeTestLoadHtml, String pathToTestHtml, Context contextForFirstHub,
-                           Context contextForSecondHub)
-            throws InterruptedException {
+    public void testXhrBridge() throws MalformedURLException, InterruptedException {
+        BridgeManager bridgeManager = getBridgeManager();
+        Context contextForFirstHub = getContextWithNewSubdirectory();
+        Context contextForSecondHub = getContextWithNewSubdirectory();
+
         startServers(contextForFirstHub, contextForSecondHub);
 
-        BridgeHandler xmlhttpBridge = new Bridge(contextForFirstHub.getFilesDir(), createClientBuilder);
+        BridgeHandler xmlhttpBridge = new Bridge(contextForFirstHub.getFilesDir(), getCreateClientBuilder());
         bridgeManager.registerIfNameNotTaken(xmlhttpBridge);
 
         BridgeHandler bridgeTestHandler = new BridgeTest();
@@ -91,15 +85,8 @@ public class BridgeTestManager {
         BridgeHandler logHandler = new LogHandler();
         bridgeManager.registerIfNameNotTaken(logHandler);
 
-        bridgeTestLoadHtml.LoadWebPage(pathToTestHtml);
-    }
+        loadHtmlInWebView(new URL(new URL(getBaseURLForTestFiles()), testHtml).toExternalForm());
 
-    /**
-     * A blocking method for use with JUnit, it won't return until the test completes.
-     * @return
-     * @throws InterruptedException
-     */
-    public boolean testResult() throws InterruptedException {
         synchronized(waitObject) {
             while(seenPing == pingStatus.unset) {
                 waitObject.wait();
@@ -107,7 +94,7 @@ public class BridgeTestManager {
         }
         thaliListenerFirstHub.stopServer();
         thaliListenerSecondHub.stopServer();
-        return seenPing == pingStatus.success;
+        assertEquals(seenPing, pingStatus.success);
     }
 
     protected void startServers(Context contextForFirstHub, Context contextForSecondHub) throws InterruptedException {

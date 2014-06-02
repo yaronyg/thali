@@ -80,3 +80,31 @@ artifacts {
     archives generateJavadocs
 }
 
+task deleteTestResources(type: Delete) {
+    delete 'src/test/resources'
+}
+
+task copyTestAssetsToTestResources(type: Copy, dependsOn: deleteTestResources) {
+    from '../AndroidUtilities/AndroidUtilities/src/androidTest/assets'
+    into 'src/test/resources'
+}
+
+task deleteProductionResources(type: Delete, dependsOn: copyTestAssetsToTestResources) {
+    delete 'src/main/resources'
+}
+
+task copyProductionAssetsToProductionResources(type: Copy, dependsOn: deleteProductionResources) {
+    from '../AndroidUtilities/AndroidUtilities/src/main/assets'
+    into 'src/main/resources'
+}
+
+task deleteUniversalTestFiles(type: Delete, dependsOn: copyProductionAssetsToProductionResources) {
+    delete 'src/test/java/com/msopentech/thali/test/'
+}
+
+task copyTestFiles(type: Copy, dependsOn: deleteUniversalTestFiles) {
+    from '../AndroidUtilities/AndroidUtilities/src/androidTest/java/com/msopentech/thali/test/'
+    into 'src/test/java/com/msopentech/thali/test/'
+}
+
+compileJava.dependsOn copyTestFiles

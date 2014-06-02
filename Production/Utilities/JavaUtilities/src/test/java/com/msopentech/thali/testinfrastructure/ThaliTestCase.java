@@ -13,25 +13,20 @@ See the Apache 2 License for the specific language governing permissions and lim
 
 package com.msopentech.thali.testinfrastructure;
 
-import android.test.*;
 import com.couchbase.lite.*;
-import com.couchbase.lite.android.*;
 import com.msopentech.thali.test.*;
-import com.msopentech.thali.test.utilities.*;
-import com.msopentech.thali.utilities.android.*;
+import com.msopentech.thali.utilities.java.*;
 import com.msopentech.thali.utilities.universal.*;
+import junit.framework.*;
 
-public class ThaliTestCase extends AndroidTestCase implements ThaliTestCaseBase {
+/**
+ * We share tests between Java and Android but they require different base classes to get unit tests to work so we
+ * hide this by having shared tests inherit from ThaliTestCase. This class also wraps environmental values that
+ * differ between Java and Android.
+ */
+public class ThaliTestCase extends TestCase implements ThaliTestCaseBase {
 
-    /**
-     * Returns the Couchbase context object
-     * @return
-     */
-    public Context getCouchbaseContext() {
-        return new AndroidContext(getContext());
-    }
+    public Context getCouchbaseContext() { return new ContextInTempDirectory(); }
 
-    public CreateClientBuilder getCreateClientBuilder() {
-        return new AndroidEktorpCreateClientBuilder();
-    }
+    public CreateClientBuilder getCreateClientBuilder() { return new JavaEktorpCreateClientBuilder(); }
 }

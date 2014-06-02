@@ -34,17 +34,6 @@ public class JavaFXBridgeManager extends BridgeManager {
         JSObject jsObject = (JSObject) webEngine.executeScript("window");
         Bridge bridge = this;
         jsObject.setMember(this.getManagerNameInJavascript(), bridge);
-
-        try {
-            createResourcesFileDirectoryAndFillItUp(Files.createTempDirectory("JavaUtilitiesFiles").toFile());
-        } catch (IOException e) {
-            throw new RuntimeException("oops", e);
-        }
-    }
-
-    @Override
-    public File getResourceFileRoot() {
-        return resourcesFileDirectory;
     }
 
     @Override

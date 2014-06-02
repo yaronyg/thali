@@ -11,7 +11,7 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 See the Apache 2 License for the specific language governing permissions and limitations under the License.
 */
 
-package com.msopentech.thali.utilities.java.test;
+package com.msopentech.thali.testinfrastructure;
 
 import com.couchbase.lite.JavaContext;
 
@@ -25,9 +25,10 @@ import java.nio.file.Files;
  * Work around for https://github.com/couchbase/couchbase-lite-java/issues/4 and
  * https://github.com/couchbase/couchbase-lite-java-core/issues/117
  */
-class CreateContextInTemp extends JavaContext {
+class ContextInTempDirectory extends JavaContext {
     private final File tempDirectory;
-    public CreateContextInTemp() {
+
+    public ContextInTempDirectory() {
         try {
             tempDirectory = Files.createTempDirectory("javacoretest").toFile();
             tempDirectory.deleteOnExit();

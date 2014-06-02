@@ -11,27 +11,22 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 See the Apache 2 License for the specific language governing permissions and limitations under the License.
 */
 
-package com.msopentech.thali.testinfrastructure;
+package com.msopentech.thali.test;
 
-import android.test.*;
 import com.couchbase.lite.*;
-import com.couchbase.lite.android.*;
-import com.msopentech.thali.test.*;
-import com.msopentech.thali.test.utilities.*;
-import com.msopentech.thali.utilities.android.*;
 import com.msopentech.thali.utilities.universal.*;
+import com.msopentech.thali.utilities.webviewbridge.*;
 
-public class ThaliTestCase extends AndroidTestCase implements ThaliTestCaseBase {
+public interface ThaliBridgeTestCaseBase {
+    public BridgeManager getBridgeManager();
+    public void loadHtmlInWebView(final String url);
+    public String getBaseURLForTestFiles();
+    public CreateClientBuilder getCreateClientBuilder();
 
     /**
-     * Returns the Couchbase context object
+     * Creates a new context object which contains a randomly named subdirectory, prevents conflicts
+     * when we need multiple independent contexts. Each call returns a new independent context instance.
      * @return
      */
-    public Context getCouchbaseContext() {
-        return new AndroidContext(getContext());
-    }
-
-    public CreateClientBuilder getCreateClientBuilder() {
-        return new AndroidEktorpCreateClientBuilder();
-    }
+    public Context getContextWithNewSubdirectory();
 }

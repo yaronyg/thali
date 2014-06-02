@@ -16,6 +16,7 @@ package com.msopentech.thali.testinfrastructure;
 import android.os.*;
 import android.test.*;
 import com.couchbase.lite.*;
+import com.msopentech.thali.test.*;
 import com.msopentech.thali.utilities.android.*;
 import com.msopentech.thali.utilities.universal.*;
 import com.msopentech.thali.utilities.webviewbridge.*;
@@ -24,9 +25,9 @@ import com.msopentech.thali.utilities.webviewbridge.*;
  * I have no been able to find a good mock activity. So I create a real activity but to test with a real activity
  * one has to use a different test clas than AndroidUnitTest used in ThaliTestCase.
  */
-public class ThaliBridgeTestCase extends ActivityInstrumentationTestCase2<AndroidBridgeManagerTestActivity> {
-    protected BridgeManager bridgeManager = null;
-    protected int foo;
+public class ThaliBridgeTestCase extends ActivityInstrumentationTestCase2<AndroidBridgeManagerTestActivity>
+    implements ThaliBridgeTestCaseBase {
+    private BridgeManager bridgeManager = null;
 
     public ThaliBridgeTestCase() {
         super(AndroidBridgeManagerTestActivity.class);
@@ -60,11 +61,6 @@ public class ThaliBridgeTestCase extends ActivityInstrumentationTestCase2<Androi
         return new AndroidEktorpCreateClientBuilder();
     }
 
-    /**
-     * Creates a new context object which contains a randomly named subdirectory, prevents conflicts
-     * when we need multiple independent contexts. Each call returns a new independent context instance.
-     * @return
-     */
     public Context getContextWithNewSubdirectory() {
         return new ContextInTempDirectory(getActivity().getApplicationContext());
     }

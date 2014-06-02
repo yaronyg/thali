@@ -70,7 +70,7 @@ public class XhrTest extends ThaliBridgeTestCase {
     }
 
     public void testXhrBridge() throws MalformedURLException, InterruptedException {
-        bridgeManager = getBridgeManager();
+        BridgeManager bridgeManager = getBridgeManager();
         Context contextForFirstHub = getContextWithNewSubdirectory();
         Context contextForSecondHub = getContextWithNewSubdirectory();
 
@@ -82,7 +82,7 @@ public class XhrTest extends ThaliBridgeTestCase {
         BridgeHandler bridgeTestHandler = new BridgeTest();
         bridgeManager.registerIfNameNotTaken(bridgeTestHandler);
 
-        BridgeHandler logHandler = new BridgeTestManager.LogHandler();
+        BridgeHandler logHandler = new LogHandler();
         bridgeManager.registerIfNameNotTaken(logHandler);
 
         loadHtmlInWebView(new URL(new URL(getBaseURLForTestFiles()), testHtml).toExternalForm());
